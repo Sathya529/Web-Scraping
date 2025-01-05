@@ -1,0 +1,25 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+base_url = "https://webscraper.io/test-sites/e-commerce/static/computers/laptops?page={}"
+laptop_data = []
+
+# Loop through the first 10 pages
+for page in range(1, 11):
+    url = base_url.format(page)
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    # Find all product listings
+    products = soup.find_all('div', class_='thumbnail')
+    for product in products:
+        title = product.find('a', class_='title').text
+        price = product.find('h4', class_='price').text
+        description = product.find('p', class_='description').text
+        laptop_data.append([title, price, description])
+
+# Create a DataFrame and export to Excel
+df = pd.DataFrame(laptop_data, columns=['Title', 'Price', 'Description'])
+df.to_excel('laptops.xlsx', index=False)
+print("Data has been exported to laptops.xlsx")
